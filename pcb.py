@@ -33,7 +33,7 @@ class PCB:
         instructions = []
         for _ in range(10):  # 生成约 10 条指令
             # 生成随机数来决定是读写操作还是输入输出操作
-            if random.random() < 0.9:  # 70% 的概率生成读写指令
+            if random.random() < 0.8:  # 70% 的概率生成读写指令
                 operation = random.choice(["READ", "WRITE"])
                 # 生成随机地址，0 到 32*1024
                 address = generate_random_address()

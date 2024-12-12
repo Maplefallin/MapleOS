@@ -1,14 +1,15 @@
 import random
-from pcb import PCB,PCBManager
+from pcb import PCB, PCBManager
 from typing import List, Optional
 from buffer import log
 from buffer import address_to_page_number
 from memory import MemoryManager
 
+
 class Scheduler:
     """多级反馈队列调度器"""
 
-    def __init__(self, pcb_manager:PCBManager, memory_manager:MemoryManager, time_slices: List[int] = [2, 4, 6]):
+    def __init__(self, pcb_manager: PCBManager, memory_manager: MemoryManager, time_slices: List[int] = [2, 4, 6]):
         """
         :param pcb_manager: PCBManager 实例
         :param memory_manager: MemoryManager 实例
@@ -21,8 +22,9 @@ class Scheduler:
         self.block_queues: List[dict] = []  # 阻塞队列，存储进程及其等待时间和下次移进的就绪队列等级
         self.finished_queues = []
 
-    def create_process(self,process_name: str, arrive_time: int, need_time: int, task_name: str, size: int, memory_manager:MemoryManager) -> Optional[PCB]:
-        pcb = self.pcb_manager.create_process(process_name,arrive_time,need_time,task_name,size,memory_manager)
+    def create_process(self, process_name: str, arrive_time: int, need_time: int, task_name: str, size: int,
+                       memory_manager: MemoryManager) -> Optional[PCB]:
+        pcb = self.pcb_manager.create_process(process_name, arrive_time, need_time, task_name, size, memory_manager)
         self.insert_high_priority_process(pcb)
         return pcb
 
@@ -32,6 +34,11 @@ class Scheduler:
             self.feedback_queues[queue_level].append(pcb)
             pcb.ready()
             log.append(f"进程 {pcb.process_name} 被加入队列 {queue_level}（时间片: {self.time_slices[queue_level]}）")
+
+            # 如果是初级队列，则根据到达时间进行排序
+            if queue_level == 0:
+                self.feedback_queues[queue_level] = sorted(self.feedback_queues[queue_level],
+                                                           key=lambda x: x.arrive_time)
 
     def schedule(self):
         """主调度逻辑"""
@@ -59,9 +66,6 @@ class Scheduler:
                 self.add_to_ready_queue(pcb, next_level)
 
     def _execute_process(self, pcb: PCB, level: int):
-
-        self._decrement_block_queue_wait()
-
         """页面请求"""
         self.pcb_manager.request_pages_for_process(pcb.process_name, self.memory_manager)
 
@@ -81,7 +85,8 @@ class Scheduler:
                         pcb.remaining_time -= 1
                     elif operation in ["INPUT", "OUTPUT"]:
                         pcb.block()
-                        self.block_queues.append({'pcb': pcb, 'wait': 3, 'next_level': min(level + 1, len(self.feedback_queues) - 1)})
+                        self.block_queues.append(
+                            {'pcb': pcb, 'wait': 3, 'next_level': min(level + 1, len(self.feedback_queues) - 1)})
                         log.append(f"进程 {pcb.process_name} 执行{operation}指令,阻塞进程")
                         break
                 log.append(f"进程 {pcb.process_name} 执行中，剩余时间: {pcb.remaining_time}")
@@ -104,11 +109,11 @@ class Scheduler:
                 next_level = min(level + 1, len(self.feedback_queues) - 1)
                 self.add_to_ready_queue(pcb, next_level)
 
-    def terminate_process(self,process_name: str):
+    def terminate_process(self, process_name: str):
         for queue in self.feedback_queues:
             for pcb in queue:
                 if pcb.process_name == process_name:
-                    self.pcb_manager.terminate_process(process_name,self.memory_manager)
+                    self.pcb_manager.terminate_process(process_name, self.memory_manager)
                     queue.remove(pcb)
                     log.append(f"将进程{pcb.process_name}销毁并释放内存")
                     return
@@ -122,3 +127,4 @@ class Scheduler:
         """插入高优先级任务"""
         self.add_to_ready_queue(pcb, queue_level=0)
         log.append(f"插入高优先级进程 {pcb.process_name} 到队列 0")
+

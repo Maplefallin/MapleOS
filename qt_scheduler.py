@@ -1,4 +1,3 @@
-import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QDialog, \
     QFormLayout, QListWidget, QListWidgetItem, QLabel, QFrame
 from PyQt5.QtCore import Qt, QTimer
@@ -100,8 +99,8 @@ class SchedulerGUI(QWidget):
             queue_widget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
             self.feedback_labels.append(label)
             self.feedback_list_widgets.append(queue_widget)
-            queue_layout.addWidget(label,alignment=Qt.AlignCenter)
-            queue_layout.addWidget(queue_widget,alignment=Qt.AlignCenter)
+            queue_layout.addWidget(label, alignment=Qt.AlignCenter)
+            queue_layout.addWidget(queue_widget, alignment=Qt.AlignCenter)
 
         layout.addLayout(queue_layout)
 
@@ -124,16 +123,16 @@ class SchedulerGUI(QWidget):
         self.block_widget.setFixedSize(100, 300)  # 设置固定大小
         self.block_widget.setAutoFillBackground(True)
         self.block_widget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        block_layout.addWidget(block_label,alignment=Qt.AlignCenter)
-        block_layout.addWidget(self.block_widget,alignment=Qt.AlignCenter)
+        block_layout.addWidget(block_label, alignment=Qt.AlignCenter)
+        block_layout.addWidget(self.block_widget, alignment=Qt.AlignCenter)
 
         finished_label = QLabel(f"完成队列", self)
         self.finished_widget = QListWidget(self)
         self.finished_widget.setFixedSize(100, 300)  # 设置固定大小
         self.finished_widget.setAutoFillBackground(True)
         self.finished_widget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        block_layout.addWidget(finished_label,alignment=Qt.AlignCenter)
-        block_layout.addWidget(self.finished_widget,alignment=Qt.AlignCenter)
+        block_layout.addWidget(finished_label, alignment=Qt.AlignCenter)
+        block_layout.addWidget(self.finished_widget, alignment=Qt.AlignCenter)
 
         layout.addLayout(block_layout)
 
@@ -218,5 +217,3 @@ class SchedulerGUI(QWidget):
             self.scheduler.schedule()
         except Exception as e:
             print(f"Error scheduling process: {e}")
-
-

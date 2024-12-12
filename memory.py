@@ -98,20 +98,28 @@ class MemoryManager:
     def release_memory(self, pcb):
         """释放进程占用的页面"""
         for page in range(pcb.begin, pcb.begin + pcb.page_count):
+            # 检查页面是否在主存栈中，如果在，则移除
+            if page in self.memory_stack:
+                self.memory_stack.remove(page)
+
+            # 检查页面是否有对应的物理块索引，如果有，则更新 bitmap
+            if self.page_table[page]["block"] != -1:
+                block_index = self.page_table[page]["block"]
+                self.bitmap[block_index] = 0  # 将对应的 bitmap 位置设置为 0
+                self.page_table[page]["block"] = -1  # 重置页面的 block 索引为 -1
+
+            # 重置页面状态为 "empty"
             if pcb.page_table[page - pcb.begin][2] == 1024:
                 self.page_table[page] = {"valid": "empty", "block": -1, "used": 0}
             else:
-                used = self.page_table[page]["used"]
-                self.page_table[page] = {"valid": "using", "block": -1,
-                                         "used": used - pcb.page_table[page - pcb.begin][2]}
+                if self.page_table[page]["valid"] == "using":
+                    self.page_table[page] = {"valid": "empty", "block": -1, "used": 0}
+                else:
+                    used = self.page_table[page]["used"]
+                    self.page_table[page] = {"valid": "using", "block": -1,
+                                             "used": used - pcb.page_table[page - pcb.begin][2]}
 
-            if page in self.memory_stack:
-                self.memory_stack.remove(page)
-                block_index = self.page_table[page]["block"]
-                # 将bitmap的对应位置设置为 0
-                if block_index != -1:
-                    self.bitmap[block_index] = 0
-            log.append(f"进程 {pcb.process_name} 的页面已释放(memory)")
+        log.append(f"进程 {pcb.process_name} 的页面已释放(main memory and bitmap)")
 
     def request_page(self, page_index):
         """请求单个页面并按需加载到主存"""

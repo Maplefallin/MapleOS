@@ -2,15 +2,25 @@ import sys
 import random
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit
 from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtGui import QFont
 from typing import List
 from buffer import log  # 确保buffer.py中有一个名为log的列表
 
+
 class LogTextEdit(QTextEdit):
     """自定义的日志文本编辑器，继承自 QTextEdit"""
+
     def __init__(self):
         super().__init__()
         self.setReadOnly(True)  # 只读模式，不能编辑
-        self.setStyleSheet("background-color: #f0f0f0; font-size: 12px;")
+
+        # 设置字体大小和居中对齐
+        font = QFont()
+        font.setPointSize(10)  # 设置字体大小为14
+        self.setFont(font)
+        self.setAlignment(Qt.AlignCenter)  # 设置文本居中对齐
+
+        self.setStyleSheet("background-color: #f0f0f0;")  # 设置背景颜色
 
         # 启动一个定时器，定期检查log是否更新
         self.timer = QTimer(self)
