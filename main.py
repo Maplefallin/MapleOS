@@ -5,9 +5,9 @@ from PyQt5.QtCore import Qt
 from scheduler import Scheduler
 from pcb import PCBManager
 from memory import MemoryManager
-from qt_log import LogTextEdit
-from qt_scheduler import SchedulerGUI
-from qt_memory import MemoryManagerGUI
+from QT import LogTextEdit
+from QT import SchedulerGUI
+from QT import MemoryManagerGUI
 
 class MainWindow(QWidget):
     def __init__(self):

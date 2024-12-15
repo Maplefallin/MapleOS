@@ -31,7 +31,7 @@ class PCB:
     def _generate_instruction_set(self):
         """生成一个随机指令集，每条指令以字典形式存储"""
         instructions = []
-        for _ in range(10):  # 生成约 10 条指令
+        for _ in range(20):  # 生成约 10 条指令
             # 生成随机数来决定是读写操作还是输入输出操作
             if random.random() < 0.8:  # 70% 的概率生成读写指令
                 operation = random.choice(["READ", "WRITE"])

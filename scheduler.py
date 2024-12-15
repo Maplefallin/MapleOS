@@ -21,6 +21,7 @@ class Scheduler:
         self.feedback_queues: List[List[PCB]] = [[] for _ in time_slices]  # 初始化多级反馈队列
         self.block_queues: List[dict] = []  # 阻塞队列，存储进程及其等待时间和下次移进的就绪队列等级
         self.finished_queues = []
+        self.count = 0
 
     def create_process(self, process_name: str, arrive_time: int, need_time: int, task_name: str, size: int,
                        memory_manager: MemoryManager) -> Optional[PCB]:
@@ -72,6 +73,10 @@ class Scheduler:
         """执行进程"""
         time_slice = self.time_slices[level]
         for _ in range(time_slice):
+
+            #总时间片加一
+            self.count += 1
+
             if pcb.remaining_time > 0:
                 executed_instruction = pcb.run()
                 if executed_instruction:  # 如果run方法返回了指令，则处理指令

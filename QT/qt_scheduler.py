@@ -5,7 +5,7 @@ from pcb import PCB, PCBManager
 from memory import MemoryManager
 from buffer import log
 from scheduler import Scheduler
-from qt_pcb import PCBWidget, ProcessInfoWindow
+from .qt_pcb import PCBWidget, ProcessInfoWindow
 
 
 class ProcessDialog(QDialog):
