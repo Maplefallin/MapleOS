@@ -54,8 +54,8 @@ class PCB:
                 instruction = self.instructions.pop(0)
                 operation = instruction["operation"]
                 address = instruction["address"]
-                log.append(f"------- {self.process_name} EXECUTE -------")
                 log.append(" ")
+                log.append(f"------------- {self.process_name} EXECUTE --------------")
                 log.append(f"进程 {self.process_name} 执行指令: {operation}, 地址: {address}")
 
                 # 根据操作类型执行对应指令
@@ -70,8 +70,8 @@ class PCB:
 
 
                 log.append(f"进程 {self.process_name} 执行完毕，剩余时间: {self.remaining_time}")
+                log.append("--------------- FINSIH ---------------")
                 log.append(" ")
-                log.append("--------- FINSIH ---------")
                 return instruction
 
             else:

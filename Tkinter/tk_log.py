@@ -4,7 +4,6 @@ import time
 import threading
 from buffer import log
 
-# 创建日志查看器，继承自tk.Frame，用于嵌入主窗口
 class LogViewer(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
@@ -21,12 +20,16 @@ class LogViewer(tk.Frame):
         self.text_box.config(state=tk.DISABLED)  # 禁止编辑
 
         # 启动监听日志更新
+        self.last_log_line = ""  # 用于存储上一条日志记录
         self.check_log()
 
     def check_log(self):
         """每秒检查日志是否更新"""
         if len(log) > 0:
-            self.update_log_output()
+            last_line = log[-1]  # 获取最后一条日志记录
+            if last_line != self.last_log_line:  # 如果最后一条记录与上一条不同
+                self.update_log_output()
+                self.last_log_line = last_line  # 更新上一条日志记录
         # 每隔1000ms（1秒）再次调用check_log
         self.after(1000, self.check_log)
 

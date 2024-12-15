@@ -140,12 +140,12 @@ class MemoryManager:
             self.page_table[evicted_page]["block"] = -1
             # 将被驱逐页面的对应bitmap位置设置为 0
             self.bitmap[block_index] = 0
-            log.append("------ LRU ------")
             log.append(" ")
+            log.append("************ LRU ************")
             log.append(f"页面置换: 驱逐页面 {evicted_page}")
             self.page_table[page_index]["block"] = block_index
+            log.append("********** FINISH ***********")
             log.append(" ")
-            log.append("------- FINISH -------")
         else:
             block_index = len(self.memory_stack)
             self.page_table[page_index]["block"] = block_index
