@@ -1,7 +1,8 @@
-import tkinter as tk
-from tkinter import ttk
 from pcb import PCB,PCBManager
 
+
+import tkinter as tk
+from tkinter import ttk
 
 class ProcessInfoWindow(tk.Toplevel):
     """显示进程详细信息和页表的窗口"""
@@ -27,8 +28,9 @@ class ProcessInfoWindow(tk.Toplevel):
         tables_layout.pack(padx=10, pady=10, fill="both", expand=True)
 
         # 页表信息表格
-        self.page_table = ttk.Treeview(tables_layout, columns=("Page", "Start Address", "Length"), show="headings")
+        self.page_table = ttk.Treeview(tables_layout, columns=("Page", "Frame", "Start Address", "Length"), show="headings")
         self.page_table.heading("Page", text="页号")
+        self.page_table.heading("Frame",text="页框号")
         self.page_table.heading("Start Address", text="起始地址")
         self.page_table.heading("Length", text="分配长度")
         self.fill_page_table()
@@ -49,6 +51,19 @@ class ProcessInfoWindow(tk.Toplevel):
         tables_layout.columnconfigure(0, weight=1)
         tables_layout.columnconfigure(1, weight=1)
 
+        # 调整列宽
+        self.adjust_column_width()
+
+    def adjust_column_width(self):
+        """调整表格列的宽度"""
+        self.page_table.column("Page", width=80, anchor="center")
+        self.page_table.column("Frame", width=80, anchor="center")
+        self.page_table.column("Start Address", width=120, anchor="center")
+        self.page_table.column("Length", width=100, anchor="center")
+
+        self.instruction_table.column("Operation", width=100, anchor="center")
+        self.instruction_table.column("Address", width=120, anchor="center")
+
     def fill_basic_info(self):
         """填充 PCB 的基本信息表格"""
         basic_info = {
@@ -57,7 +72,6 @@ class ProcessInfoWindow(tk.Toplevel):
             "需求时间": self.pcb.need_time,
             "任务名称": self.pcb.task_name,
             "大小": self.pcb.size,
-            "起始页号": self.pcb.begin,
             "分配的页面数": self.pcb.page_count,
             "状态": self.pcb.status,
             "剩余执行时间": self.pcb.remaining_time
@@ -67,13 +81,15 @@ class ProcessInfoWindow(tk.Toplevel):
 
     def fill_page_table(self):
         """填充 PCB 的页表信息表格"""
-        for page_number, start_address, length in self.pcb.page_table:
-            self.page_table.insert("", "end", values=(page_number, start_address, length))
+        for page_number, page_frame_number, start_address, length in self.pcb.page_table:
+            self.page_table.insert("", "end", values=(page_number, page_frame_number, start_address, length))
 
     def fill_instruction_table(self):
         """填充 PCB 的指令集信息表格"""
         for instruction in self.pcb.instructions:
             self.instruction_table.insert("", "end", values=(instruction["operation"], instruction["address"]))
+
+
 
 
 class ProcessListWindow(tk.Frame):

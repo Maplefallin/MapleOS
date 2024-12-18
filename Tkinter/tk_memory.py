@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-from buffer import log, VIRTUAL_PAGES, PAGE_SIZE, PHYSICAL_BLOCKS
+
+from Tkinter.tk_memory_part import MemoryVisualizer
 from memory import MemoryManager
 
 
@@ -10,27 +11,35 @@ class MemoryViewer(tk.Frame):
         self.memory_manager = memory_manager
         self.pack(fill=tk.BOTH, expand=True)
 
+        # 创建一个PanedWindow用于分割左侧和右侧
+        self.paned_window = tk.PanedWindow(self, orient=tk.HORIZONTAL)
+        self.paned_window.pack(fill=tk.BOTH, expand=True)
+
+        # 左侧部分：页表和主存栈
+        self.left_frame = tk.Frame(self.paned_window)
+        self.left_frame.pack(fill=tk.BOTH, expand=True)
+
         # 创建一个Frame用于页表部分
-        self.page_table_frame = tk.Frame(self)
+        self.page_table_frame = tk.Frame(self.left_frame)
         self.page_table_frame.pack(pady=20, padx=10, fill=tk.BOTH, expand=True)
 
-        self.page_table_label = tk.Label(self.page_table_frame, text="页表", font=("Arial", 14))
+        self.page_table_label = tk.Label(self.page_table_frame, text="页框表", font=("Arial", 14))
         self.page_table_label.pack(pady=10)
 
         # 创建一个Treeview表格显示页表
-        self.page_table_tree = ttk.Treeview(self.page_table_frame, columns=("页号", "状态", "物理块"), show="headings")
-        self.page_table_tree.heading("页号", text="页号")
+        self.page_table_tree = ttk.Treeview(self.page_table_frame, columns=("页框号", "状态", "物理块"), show="headings")
+        self.page_table_tree.heading("页框号", text="页框号")
         self.page_table_tree.heading("状态", text="状态")
         self.page_table_tree.heading("物理块", text="物理块")
 
-        self.page_table_tree.column("页号", width=100, anchor=tk.CENTER)
+        self.page_table_tree.column("页框号", width=100, anchor=tk.CENTER)
         self.page_table_tree.column("状态", width=100, anchor=tk.CENTER)
         self.page_table_tree.column("物理块", width=100, anchor=tk.CENTER)
 
         self.page_table_tree.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         # 创建一个Frame用于主存栈部分
-        self.memory_stack_frame = tk.Frame(self)
+        self.memory_stack_frame = tk.Frame(self.left_frame)
         self.memory_stack_frame.pack(pady=20, padx=10, fill=tk.BOTH, expand=True)
 
         self.memory_stack_label = tk.Label(self.memory_stack_frame, text="已经载入内存的页面", font=("Arial", 14))
@@ -44,9 +53,13 @@ class MemoryViewer(tk.Frame):
 
         self.memory_stack_tree.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        # # 加载页面按钮
-        # self.load_button = tk.Button(self, text="加载页面", command=self.load_page)
-        # self.load_button.pack(pady=10)
+        # 右侧部分：MemoryVisualizer
+        self.memory_visualizer = MemoryVisualizer(self.paned_window, self.memory_manager)
+        self.memory_visualizer.pack(fill=tk.BOTH, expand=True)
+
+        # 将左侧和右侧框架添加到PanedWindow
+        self.paned_window.add(self.left_frame)
+        self.paned_window.add(self.memory_visualizer)
 
         # 启动监听，定期每秒更新显示
         self.listen_updates()
@@ -55,14 +68,6 @@ class MemoryViewer(tk.Frame):
         """每秒监听一次内存更新"""
         self.update_display()  # 更新界面显示
         self.after(1000, self.listen_updates)  # 每秒钟再次调用监听
-
-    # def load_page(self):
-    #     """加载页面并更新展示"""
-    #     # 模拟加载页面
-    #     page_num = len(self.memory_manager.memory_stack)  # 根据内存栈的长度选择下一个页面
-    #     if page_num < VIRTUAL_PAGES:
-    #         self.memory_manager.load_page(page_num)
-    #     self.update_display()
 
     def update_display(self):
         """更新页表和内存栈的展示"""

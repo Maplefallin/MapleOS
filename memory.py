@@ -1,23 +1,27 @@
 import random
 from collections import deque
 from buffer import log
-from buffer import VIRTUAL_PAGES, PAGE_SIZE,PHYSICAL_BLOCKS
+from buffer import VIRTUAL_PAGES, PAGE_SIZE,MEMORY_BLOCKS,USABLE_BLOCKS
 """内存管理器类"""
 
 
 class MemoryManager:
 
     def __init__(self):
-        self.page_table = [{"valid": "empty", "block": -1, "used": 0} for _ in range(VIRTUAL_PAGES)]
+        # 初始化 page_table
+        self.page_table = [
+            {"valid": "empty", "block": -1, "used": 0} if i < VIRTUAL_PAGES // 2
+            else {"valid": "full", "block": -1, "used": 1024}
+            for i in range(VIRTUAL_PAGES)
+        ]
+        self.memory = [-1] * USABLE_BLOCKS  # 前 USABLE_BLOCKS 个块为空
+        self.memory.extend([1] * (MEMORY_BLOCKS - USABLE_BLOCKS))  # 剩余块已满
         self.virtual_memory = [f"Page {i} empty" for i in range(VIRTUAL_PAGES)]
-        self.bitmap = [0] * PHYSICAL_BLOCKS  # bitmap，用于表示主存块的占用情况
-        self.memory_stack = deque()  # 用于实现 LRU 页面置换
+        self.bitmap = [0] * USABLE_BLOCKS + [1] * (MEMORY_BLOCKS - USABLE_BLOCKS)
+        self.memory_stack = deque()
 
     def allocate_pages(self, memory_size):
-        """
-        分配页面，按照首次适应算法。
-        输入为进程所需内存大小（字节），返回起始页号和进程的页表，若分配失败返回 None。
-        """
+        """分配页面，按照首次适应算法。"""
         required_memory = memory_size
         start_page = None
         allocated_pages = []
@@ -86,14 +90,15 @@ class MemoryManager:
             log.append(f"进程 {pcb.process_name} 没有分配页面。")
             return
 
-        pages = list(range(pcb.begin, pcb.begin + pcb.page_count))
-        log.append(f"进程 {pcb.process_name} 请求内存 (页范围: {pages})")
-
+        pages = list(range(0, pcb.page_count))
         # 随机选择一个页面号
         selected_page = random.choice(pages)
+        selected_page_frame = selected_page+pcb.begin
+
+        log.append(f"进程 {pcb.process_name} 请求页面{selected_page} || 页框号为{selected_page_frame}")
 
         # 请求选中的页面
-        self.request_page(selected_page)
+        self.request_page(selected_page_frame)
 
     def release_memory(self, pcb):
         """释放进程占用的页面"""
@@ -125,35 +130,38 @@ class MemoryManager:
         """请求单个页面并按需加载到主存"""
         if self.page_table[page_index]["valid"]:
             if self.page_table[page_index]["block"] != -1:
-                log.append(f"页面 {page_index} 已在主存。")
+                log.append(f"页框 {page_index} 已在主存。")
                 self._update_lru(page_index)
             else:
                 self._load_page(page_index)
         else:
-            log.append(f"页面 {page_index} 无效 (未分配)，无法加载")
+            log.append(f"页框 {page_index} 无效 (未分配)，无法加载")
 
     def _load_page(self, page_index):
         """将页面加载到主存，并进行 LRU 页面置换"""
-        if len(self.memory_stack) >= PHYSICAL_BLOCKS:  # 主存已满
+        if len(self.memory_stack) >= USABLE_BLOCKS:  # 主存已满
             evicted_page = self.memory_stack.popleft()
             block_index = self.page_table[evicted_page]["block"]
             self.page_table[evicted_page]["block"] = -1
-            # 将被驱逐页面的对应bitmap位置设置为 0
-            self.bitmap[block_index] = 0
+            # 更新 memory 数组，将被驱逐的页面位置置为 -1
+            self.memory[block_index] = -1
+            self.bitmap[block_index] = 0  # 将对应的 bitmap 位置设置为 0
+            print("LRU")
             log.append(" ")
-            log.append("************ LRU ************")
-            log.append(f"页面置换: 驱逐页面 {evicted_page}")
+            log.append("************* LRU *************")
+            log.append(f"页面置换: 驱逐页框号 {evicted_page}")
             self.page_table[page_index]["block"] = block_index
-            log.append("********** FINISH ***********")
+            log.append("*********** FINISH ************")
             log.append(" ")
+
         else:
             block_index = len(self.memory_stack)
             self.page_table[page_index]["block"] = block_index
 
+        self.memory[block_index] = page_index  # 更新 memory 数组
         self.memory_stack.append(page_index)
-        self.bitmap[block_index] = 1  # 将对应的bitmap位置设置为 1
-        log.append(f"页面 {page_index} 加载到主存块 {block_index}")
-
+        self.bitmap[block_index] = 1  # 将对应的 bitmap 位置设置为 1
+        log.append(f"页框号 {page_index} 加载到主存块 {block_index}")
 
     def _update_lru(self, page_index):
         """更新页面在 LRU 栈中的位置"""

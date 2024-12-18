@@ -3,7 +3,7 @@ from typing import List
 from prettytable import PrettyTable
 from pcb import PCBManager,PCB
 from scheduler import Scheduler
-from buffer import PAGE_SIZE,VIRTUAL_PAGES,PHYSICAL_BLOCKS
+from buffer import PAGE_SIZE,VIRTUAL_PAGES
 
 class Client:
     """与用户交互的客户端"""

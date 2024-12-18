@@ -1,3 +1,5 @@
+from sched import scheduler
+
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QDialog, \
     QFormLayout, QListWidget, QListWidgetItem, QLabel, QFrame
 from PyQt5.QtCore import Qt, QTimer
@@ -217,3 +219,4 @@ class SchedulerGUI(QWidget):
             self.scheduler.schedule()
         except Exception as e:
             print(f"Error scheduling process: {e}")
+

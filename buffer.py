@@ -3,13 +3,13 @@ from typing import List
 
 log: List[str] = []  # 记录调度日志
 PAGE_SIZE = 1024  # 每页大小
-VIRTUAL_PAGES = 32  # 虚拟页面总数
-PHYSICAL_BLOCKS = 8  # 主存块数
-
+VIRTUAL_PAGES = 64  # 虚拟页框总数
+MEMORY_BLOCKS = 64  #主存块述
+USABLE_BLOCKS = 20
 
 def generate_random_address():
     """生成一个 0 到 32 * 1024 之间的随机整数"""
-    return random.randint(0, VIRTUAL_PAGES * PAGE_SIZE - 1)
+    return random.randint(20*PAGE_SIZE, 30*PAGE_SIZE)
 
 def generate_hex_address(address):
     """生成一个十六进制地址"""

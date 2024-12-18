@@ -1,6 +1,7 @@
 import random
 from typing import List, Optional
-from buffer import generate_random_address,log
+from buffer import generate_random_address, log
+from memory import MemoryManager
 
 
 class PCB:
@@ -12,9 +13,9 @@ class PCB:
         self.need_time = need_time
         self.task_name = task_name
         self.size = size
-        self.begin = -1  # 起始页号
+        self.begin = -1  # 页框号的起始地址
         self.page_count = 0  # 分配的页面数
-        self.page_table = []  # 地址表 [(页号, 起始地址, 分配长度)]
+        self.page_table = []  # 地址表 [(页号, 页框号, 起始地址, 分配长度)]
         self.status = "Ready"  # 默认状态为就绪
         self.remaining_time = need_time  # 剩余执行时间
 
@@ -47,6 +48,7 @@ class PCB:
         """将状态置为运行，并执行一条指令"""
         if self.status in ["Ready", "Blocked"]:
             self.status = "Running"
+            log.append(f"当前状态 ***** {self.status} *****")
 
         if self.status == "Running" and self.remaining_time > 0:
             # 执行下一条指令
@@ -68,7 +70,6 @@ class PCB:
                 elif operation == "OUTPUT":
                     self.output_data()
 
-
                 log.append(f"进程 {self.process_name} 执行完毕，剩余时间: {self.remaining_time}")
                 log.append("--------------- FINSIH ---------------")
                 log.append(" ")
@@ -76,8 +77,6 @@ class PCB:
 
             else:
                 log.append(f"进程 {self.process_name} 无指令可执行")
-
-
 
         if self.remaining_time == 0:
             self.status = "Finished"
@@ -125,11 +124,20 @@ class PCBManager:
 
         start_page, page_table = allocation_result
         pcb = PCB(process_name, arrive_time, need_time, task_name, size)
+
+        # 重新生成页表，修改为 (页号, 页框号, 起始地址, 分配长度)
+        page_table_with_frame = []
+        for idx, (page_index, start_address, allocation) in enumerate(page_table):
+            # 页号是从 0 开始，递增
+            page_number = idx
+            frame_number = start_page + idx  # 页框号
+            page_table_with_frame.append((page_number, frame_number, start_address, allocation))
+
         pcb.begin = start_page
         pcb.page_count = len(page_table)
-        pcb.page_table = page_table
+        pcb.page_table = page_table_with_frame
         self.processes.append(pcb)
-        log.append(f"进程 {process_name} 创建成功，起始页号: {start_page}")
+        log.append(f"进程 {process_name} 创建成功，起始页框号: {start_page}")
         return pcb
 
     def terminate_process(self, process_name: str, memory_manager):
@@ -170,3 +178,9 @@ class PCBManager:
                 memory_manager.request_pages_for_process(pcb)
                 return
         log.append(f"进程 {process_name} 未找到！")
+
+
+if __name__ == "__main__":
+    pcb_manager = PCBManager()
+    memory = MemoryManager()
+    pcb_manager.create_process("p1",1,6,"t1",1000,memory_manager=memory)

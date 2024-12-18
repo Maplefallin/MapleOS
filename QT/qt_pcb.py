@@ -29,8 +29,8 @@ class ProcessInfoWindow(QDialog):
         # 页表信息表格
         self.page_table = QTableWidget(self)
         self.page_table.setRowCount(len(self.pcb.page_table))
-        self.page_table.setColumnCount(3)
-        self.page_table.setHorizontalHeaderLabels(["页号", "起始地址", "分配长度"])
+        self.page_table.setColumnCount(4)
+        self.page_table.setHorizontalHeaderLabels(["页号", "页框号","起始地址", "分配长度"])
         self.fill_page_table()
         tables_layout.addWidget(self.page_table)
 
@@ -72,10 +72,11 @@ class ProcessInfoWindow(QDialog):
 
     def fill_page_table(self):
         """填充 PCB 的页表信息表格"""
-        for row, (page_number, start_address, length) in enumerate(self.pcb.page_table):
+        for row, (page_number,page_frame, start_address, length) in enumerate(self.pcb.page_table):
             self.page_table.setItem(row, 0, QTableWidgetItem(str(page_number)))
-            self.page_table.setItem(row, 1, QTableWidgetItem(str(start_address)))
-            self.page_table.setItem(row, 2, QTableWidgetItem(str(length)))
+            self.page_table.setItem(row, 1, QTableWidgetItem(str(page_frame)))
+            self.page_table.setItem(row, 2, QTableWidgetItem(str(start_address)))
+            self.page_table.setItem(row, 3, QTableWidgetItem(str(length)))
 
     def fill_instruction_table(self):
         """填充 PCB 的指令集信息表格"""

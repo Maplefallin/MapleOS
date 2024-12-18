@@ -4,7 +4,7 @@ from collections import deque
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QSplitter, QHBoxLayout, \
     QLabel, QLineEdit, QFormLayout, QPushButton, QDialog, QScrollArea, QHeaderView
 from PyQt5.QtCore import Qt, QTimer
-from buffer import log, VIRTUAL_PAGES, PAGE_SIZE, PHYSICAL_BLOCKS
+from buffer import log, VIRTUAL_PAGES, PAGE_SIZE,MEMORY_BLOCKS
 from memory import MemoryManager
 
 
@@ -26,13 +26,13 @@ class MemoryManagerGUI(QWidget):
         self.page_table = QTableWidget(self)
         self.page_table.setRowCount(VIRTUAL_PAGES)
         self.page_table.setColumnCount(3)
-        self.page_table.setHorizontalHeaderLabels(["页号", "状态", "块号"])
+        self.page_table.setHorizontalHeaderLabels(["页框号", "状态", "块号"])
         self.page_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(self.page_table)
 
         # 内存栈
         self.memory_stack_table = QTableWidget(self)
-        self.memory_stack_table.setRowCount(PHYSICAL_BLOCKS)
+        self.memory_stack_table.setRowCount(MEMORY_BLOCKS)
         self.memory_stack_table.setColumnCount(2)
         self.memory_stack_table.setHorizontalHeaderLabels(["块号", "使用状态"])
         self.memory_stack_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -53,7 +53,7 @@ class MemoryManagerGUI(QWidget):
             self.page_table.setItem(i, 1, QTableWidgetItem(self.memory_manager.page_table[i]["valid"]))
             self.page_table.setItem(i, 2, QTableWidgetItem(str(self.memory_manager.page_table[i]["block"])))
 
-        for i in range(PHYSICAL_BLOCKS):
+        for i in range(MEMORY_BLOCKS):
             self.memory_stack_table.setItem(i, 0, QTableWidgetItem(str(i)))
             self.memory_stack_table.setItem(i, 1, QTableWidgetItem("使用" if self.memory_manager.bitmap[i] else "空闲"))
 

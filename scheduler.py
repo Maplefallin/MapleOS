@@ -42,6 +42,10 @@ class Scheduler:
                                                            key=lambda x: x.arrive_time)
 
     def schedule(self):
+
+        # 检查阻塞队列，将等待值减一
+        self._decrement_block_queue_wait()
+
         """主调度逻辑"""
         for level, queue in enumerate(self.feedback_queues):
             if queue:
@@ -52,8 +56,6 @@ class Scheduler:
         # 若所有队列均为空，则表示没有可调度进程
         log.append("当前无可调度进程")
 
-        # 检查阻塞队列，将等待值减一
-        self._decrement_block_queue_wait()
 
     def _decrement_block_queue_wait(self):
         """减少阻塞队列中进程的等待时间"""
@@ -133,3 +135,16 @@ class Scheduler:
         self.add_to_ready_queue(pcb, queue_level=0)
         log.append(f"插入高优先级进程 {pcb.process_name} 到队列 0")
 
+
+if __name__ == "__main__":
+    pcb_manager = PCBManager()
+    memory = MemoryManager()
+    scheduler = Scheduler(memory_manager=memory, pcb_manager=pcb_manager)
+
+    scheduler.create_process("p1", 1, 7, "", 1000, memory_manager=memory)
+    scheduler.create_process("p2", 2, 8, "", 1000, memory_manager=memory)
+    scheduler.create_process("p3", 1, 7, "", 1000, memory_manager=memory)
+    scheduler.create_process("p4", 2, 8, "", 1000, memory_manager=memory)
+
+    for i in range(10):
+        scheduler.schedule()

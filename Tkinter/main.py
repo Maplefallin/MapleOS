@@ -21,8 +21,6 @@ class MainWindow(tk.Tk):
         self.geometry("1200x800")  # 设置合适的窗口大小
 
         # 创建 PCBManager 并添加进程
-        pcb1 = PCB("进程1", 0, 50, "任务A", 1000)
-        pcb2 = PCB("进程2", 5, 30, "任务B", 800)
         self.pcb_manager = PCBManager()
         self.memory = MemoryManager()
         self.scheduler = Scheduler(memory_manager=self.memory, pcb_manager=self.pcb_manager)
