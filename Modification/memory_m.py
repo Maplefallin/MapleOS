@@ -1,7 +1,7 @@
 import random
 from collections import deque
 
-from pcb import PCBManager,PCB
+from Modification.pcb_m import PCBManager,PCB
 from buffer import log
 from buffer import VIRTUAL_PAGES, PAGE_SIZE,MEMORY_BLOCKS,USABLE_BLOCKS
 
@@ -17,6 +17,7 @@ class MemoryManager:
             else {"valid": "full", "block": -1, "used": 1024}
             for i in range(VIRTUAL_PAGES)
         ]
+        self.memory_list = [[{"pcb":None,"page":-1}] * (USABLE_BLOCKS/5)]*5
         self.memory = [{"pcb":None,"page":-1}] * USABLE_BLOCKS  # 前 USABLE_BLOCKS 个块为空
         self.memory.extend([1] * (MEMORY_BLOCKS - USABLE_BLOCKS))  # 剩余块已满
         self.virtual_memory = [f"Page {i} empty" for i in range(VIRTUAL_PAGES)]
@@ -99,6 +100,8 @@ class MemoryManager:
             log.append("************* LRU *************")
             log.append(f"页面置换: 驱逐{evicted_pcb.process_name} 页面 {evicted_page}")
             # print(f"lru中:{self.memory_stack}")
+            pcb.page_table[page_index]["exist"] = 1
+            pcb.page_table[page_index]["frame"] = block_index
             log.append("*********** FINISH ************")
             log.append(" ")
 
@@ -109,8 +112,6 @@ class MemoryManager:
         self.memory_stack.append({"block":block_index,"page":page_index,"pcb":pcb.process_name})
         self.memory[block_index] = {"pcb":pcb,"page":page_index}  # 更新 memory 数组
         self.bitmap[block_index] = 1  # 将对应的 bitmap 位置设置为 1
-        pcb.page_table[page_index]["exist"] = 1
-        pcb.page_table[page_index]["frame"] = block_index
         log.append(f"{pcb.process_name} 页面 {page_index} 加载到主存块 {block_index}")
 
         # print(f"lru后{self.memory_stack}")

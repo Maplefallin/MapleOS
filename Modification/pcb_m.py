@@ -19,6 +19,7 @@ class PCB:
         self.page_table = []  # 地址表 [{"page":None,"frame"：-1,"exist":0}]
         self.status = "Ready"  # 默认状态为就绪
         self.remaining_time = need_time  # 剩余执行时间
+        self.memory_index = -1
 
         # 计算 page_total 并向上取整
         page_total = int(math.ceil(self.size / PAGE_SIZE))

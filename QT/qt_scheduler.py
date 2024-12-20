@@ -1,13 +1,9 @@
-from sched import scheduler
-
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QDialog, \
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QDialog, \
     QFormLayout, QListWidget, QListWidgetItem, QLabel, QFrame
 from PyQt5.QtCore import Qt, QTimer
-from pcb import PCB, PCBManager
-from memory import MemoryManager
 from buffer import log
 from scheduler import Scheduler
-from .qt_pcb import PCBWidget, ProcessInfoWindow
+from .qt_pcb import PCBWidget
 
 
 class ProcessDialog(QDialog):

@@ -1,4 +1,4 @@
-from pcb import PCB,PCBManager
+from Modification.pcb_m import PCB,PCBManager
 
 
 import tkinter as tk

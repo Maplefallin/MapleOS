@@ -2,7 +2,7 @@ from Modification.pcb_m import PCB, PCBManager
 from typing import List, Optional
 from buffer import log
 from buffer import address_to_page_number
-from memory import MemoryManager
+from memory_m import MemoryManager
 
 
 class Scheduler:
@@ -54,7 +54,6 @@ class Scheduler:
 
         # 若所有队列均为空，则表示没有可调度进程
         log.append("当前无可调度进程")
-        print("当前无可调度进程")
 
 
     def _decrement_block_queue_wait(self):
@@ -146,5 +145,5 @@ if __name__ == "__main__":
     scheduler.create_process("p3", 1, 7, "", 1000, memory_manager=memory)
     scheduler.create_process("p4", 2, 8, "", 1000, memory_manager=memory)
 
-    for i in range(50):
+    for i in range(10):
         scheduler.schedule()

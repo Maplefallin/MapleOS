@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox,ttk
 from scheduler import Scheduler
 from memory import MemoryManager
-from pcb import PCB,PCBManager
+from Modification.pcb_m import PCBManager
 
 
 class ProcessDialog(tk.Toplevel):

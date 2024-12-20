@@ -1,4 +1,4 @@
-from client import PCB
+from pcb import PCB
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QDialog, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QFont
@@ -17,7 +17,7 @@ class ProcessInfoWindow(QDialog):
 
         # PCB基本信息表格
         self.pcb_info_table = QTableWidget(self)
-        self.pcb_info_table.setRowCount(8)  # 基本信息有8个字段
+        self.pcb_info_table.setRowCount(7)  # 基本信息有8个字段
         self.pcb_info_table.setColumnCount(2)
         self.pcb_info_table.setHorizontalHeaderLabels(["字段", "值"])
         self.fill_basic_info()
@@ -29,8 +29,8 @@ class ProcessInfoWindow(QDialog):
         # 页表信息表格
         self.page_table = QTableWidget(self)
         self.page_table.setRowCount(len(self.pcb.page_table))
-        self.page_table.setColumnCount(4)
-        self.page_table.setHorizontalHeaderLabels(["页号", "页框号","起始地址", "分配长度"])
+        self.page_table.setColumnCount(3)
+        self.page_table.setHorizontalHeaderLabels(["页号", "页框号","主存位"])
         self.fill_page_table()
         tables_layout.addWidget(self.page_table)
 
@@ -59,7 +59,6 @@ class ProcessInfoWindow(QDialog):
             "需求时间": self.pcb.need_time,
             "任务名称": self.pcb.task_name,
             "大小": self.pcb.size,
-            "起始页号": self.pcb.begin,
             "分配的页面数": self.pcb.page_count,
             "状态": self.pcb.status,
             "剩余执行时间": self.pcb.remaining_time
@@ -72,11 +71,10 @@ class ProcessInfoWindow(QDialog):
 
     def fill_page_table(self):
         """填充 PCB 的页表信息表格"""
-        for row, (page_number,page_frame, start_address, length) in enumerate(self.pcb.page_table):
-            self.page_table.setItem(row, 0, QTableWidgetItem(str(page_number)))
-            self.page_table.setItem(row, 1, QTableWidgetItem(str(page_frame)))
-            self.page_table.setItem(row, 2, QTableWidgetItem(str(start_address)))
-            self.page_table.setItem(row, 3, QTableWidgetItem(str(length)))
+        for row, page_info in enumerate(self.pcb.page_table):
+            self.page_table.setItem(row, 0, QTableWidgetItem(str(page_info['page'])))
+            self.page_table.setItem(row, 1, QTableWidgetItem(str(page_info['frame'])))
+            self.page_table.setItem(row, 2, QTableWidgetItem(str(page_info['exist'])))
 
     def fill_instruction_table(self):
         """填充 PCB 的指令集信息表格"""
