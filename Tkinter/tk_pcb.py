@@ -28,11 +28,10 @@ class ProcessInfoWindow(tk.Toplevel):
         tables_layout.pack(padx=10, pady=10, fill="both", expand=True)
 
         # 页表信息表格
-        self.page_table = ttk.Treeview(tables_layout, columns=("Page", "Frame", "Start Address", "Length"), show="headings")
+        self.page_table = ttk.Treeview(tables_layout, columns=("Page", "Frame", "Exist"), show="headings")
         self.page_table.heading("Page", text="页号")
         self.page_table.heading("Frame",text="页框号")
-        self.page_table.heading("Start Address", text="起始地址")
-        self.page_table.heading("Length", text="分配长度")
+        self.page_table.heading("Exist", text="存在位")
         self.fill_page_table()
         self.page_table.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
@@ -58,8 +57,8 @@ class ProcessInfoWindow(tk.Toplevel):
         """调整表格列的宽度"""
         self.page_table.column("Page", width=80, anchor="center")
         self.page_table.column("Frame", width=80, anchor="center")
-        self.page_table.column("Start Address", width=120, anchor="center")
-        self.page_table.column("Length", width=100, anchor="center")
+        self.page_table.column("Exist", width=80, anchor="center")
+
 
         self.instruction_table.column("Operation", width=100, anchor="center")
         self.instruction_table.column("Address", width=120, anchor="center")
@@ -81,8 +80,8 @@ class ProcessInfoWindow(tk.Toplevel):
 
     def fill_page_table(self):
         """填充 PCB 的页表信息表格"""
-        for page_number, page_frame_number, start_address, length in self.pcb.page_table:
-            self.page_table.insert("", "end", values=(page_number, page_frame_number, start_address, length))
+        for item in self.pcb.page_table:
+            self.page_table.insert("", "end", values=(item["page"], item["frame"], item["exist"]))
 
     def fill_instruction_table(self):
         """填充 PCB 的指令集信息表格"""

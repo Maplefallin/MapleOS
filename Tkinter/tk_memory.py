@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-
-from Tkinter.tk_memory_part import MemoryVisualizer
+from buffer import USABLE_BLOCKS
 from memory import MemoryManager
 
 
@@ -11,79 +10,98 @@ class MemoryViewer(tk.Frame):
         self.memory_manager = memory_manager
         self.pack(fill=tk.BOTH, expand=True)
 
-        # 创建一个PanedWindow用于分割左侧和右侧
-        self.paned_window = tk.PanedWindow(self, orient=tk.HORIZONTAL)
-        self.paned_window.pack(fill=tk.BOTH, expand=True)
-
-        # 左侧部分：页表和主存栈
-        self.left_frame = tk.Frame(self.paned_window)
+        # Create a frame for the left section (Page Table, Memory Stack, and Canvas)
+        self.left_frame = tk.Frame(self)
         self.left_frame.pack(fill=tk.BOTH, expand=True)
 
-        # 创建一个Frame用于页表部分
+        # Create Canvas for displaying bitmap (place above or below the tables)
+        self.canvas_frame = tk.Frame(self.left_frame)
+        self.canvas_frame.pack(fill=tk.X, expand=True, pady=20)
+
+        self.canvas = tk.Canvas(self.canvas_frame)
+        self.canvas.pack(side="left", fill=tk.BOTH, expand=True)
+
+        # Create vertical scrollbar for the canvas
+        self.canvas_scroll = tk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas.yview)
+        self.canvas_scroll.pack(side="right", fill="y")
+        self.canvas.configure(yscrollcommand=self.canvas_scroll.set)
+
+        # Page Table Section
         self.page_table_frame = tk.Frame(self.left_frame)
         self.page_table_frame.pack(pady=20, padx=10, fill=tk.BOTH, expand=True)
 
-        self.page_table_label = tk.Label(self.page_table_frame, text="页框表", font=("Arial", 14))
+        self.page_table_label = tk.Label(self.page_table_frame, text="主存", font=("Arial", 14))
         self.page_table_label.pack(pady=10)
 
-        # 创建一个Treeview表格显示页表
-        self.page_table_tree = ttk.Treeview(self.page_table_frame, columns=("页框号", "状态", "物理块"), show="headings")
-        self.page_table_tree.heading("页框号", text="页框号")
-        self.page_table_tree.heading("状态", text="状态")
-        self.page_table_tree.heading("物理块", text="物理块")
+        self.page_table_tree = ttk.Treeview(self.page_table_frame, columns=("Physical Block", "Process", "Page Number"), show="headings")
+        self.page_table_tree.heading("Physical Block", text="Physical Block")
+        self.page_table_tree.heading("Process", text="Process")
+        self.page_table_tree.heading("Page Number", text="Page Number")
 
-        self.page_table_tree.column("页框号", width=100, anchor=tk.CENTER)
-        self.page_table_tree.column("状态", width=100, anchor=tk.CENTER)
-        self.page_table_tree.column("物理块", width=100, anchor=tk.CENTER)
+        self.page_table_tree.column("Physical Block", width=100, anchor=tk.CENTER)
+        self.page_table_tree.column("Process", width=100, anchor=tk.CENTER)
+        self.page_table_tree.column("Page Number", width=100, anchor=tk.CENTER)
 
         self.page_table_tree.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        # 创建一个Frame用于主存栈部分
+        # Memory Stack Section
         self.memory_stack_frame = tk.Frame(self.left_frame)
         self.memory_stack_frame.pack(pady=20, padx=10, fill=tk.BOTH, expand=True)
 
-        self.memory_stack_label = tk.Label(self.memory_stack_frame, text="已经载入内存的页面", font=("Arial", 14))
+        self.memory_stack_label = tk.Label(self.memory_stack_frame, text="主存栈", font=("Arial", 14))
         self.memory_stack_label.pack(pady=10)
 
-        # 创建一个Treeview表格显示主存栈
-        self.memory_stack_tree = ttk.Treeview(self.memory_stack_frame, columns=("主存页号"), show="headings")
-        self.memory_stack_tree.heading("主存页号", text="主存页号")
+        self.memory_stack_tree = ttk.Treeview(self.memory_stack_frame, columns=("Block Number", "Page Number"), show="headings")
+        self.memory_stack_tree.heading("Block Number", text="Block Number")
+        self.memory_stack_tree.heading("Page Number", text="Page Number")
 
-        self.memory_stack_tree.column("主存页号", width=120, anchor=tk.CENTER)
+        self.memory_stack_tree.column("Block Number", width=100, anchor=tk.CENTER)
+        self.memory_stack_tree.column("Page Number", width=100, anchor=tk.CENTER)
 
         self.memory_stack_tree.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        # 右侧部分：MemoryVisualizer
-        self.memory_visualizer = MemoryVisualizer(self.paned_window, self.memory_manager)
-        self.memory_visualizer.pack(fill=tk.BOTH, expand=True)
-
-        # 将左侧和右侧框架添加到PanedWindow
-        self.paned_window.add(self.left_frame)
-        self.paned_window.add(self.memory_visualizer)
-
-        # 启动监听，定期每秒更新显示
+        # Start listening for updates
         self.listen_updates()
 
+
     def listen_updates(self):
-        """每秒监听一次内存更新"""
-        self.update_display()  # 更新界面显示
-        self.after(1000, self.listen_updates)  # 每秒钟再次调用监听
+        """Listen for memory updates every second"""
+        self.update_display()  # Update the UI display
+        self.after(1000, self.listen_updates)  # Re-run every second
 
     def update_display(self):
-        """更新页表和内存栈的展示"""
-        # 更新页表展示
+        """Update the page table and memory stack display"""
+        # Update Page Table display
         for row in self.page_table_tree.get_children():
             self.page_table_tree.delete(row)
 
-        for i, entry in enumerate(self.memory_manager.page_table):
-            self.page_table_tree.insert("", "end", values=(i, entry['valid'], entry['block']))
+        for i, entry in enumerate(self.memory_manager.memory[:USABLE_BLOCKS]):
+            process_name = entry["pcb"].process_name if entry["pcb"] else "Empty"
 
-        # 更新主存栈展示
+            self.page_table_tree.insert("", "end", values=(i, process_name, entry["page"]))
+
+        # Update Memory Stack display
         for row in self.memory_stack_tree.get_children():
             self.memory_stack_tree.delete(row)
 
         for page_num in self.memory_manager.memory_stack:
-            self.memory_stack_tree.insert("", "end", values=(page_num,))
+            self.memory_stack_tree.insert("", "end", values=(page_num["block"], page_num["page"]))
+
+        """更新bitmap的显示"""
+        self.canvas.delete("all")  # 清空画布
+        size = 30  # 每个小块的尺寸
+        rows = (len(self.memory_manager.bitmap) + 7) // 8  # 计算总行数
+        canvas_width = self.canvas.winfo_width()  # 获取画布的宽度
+        canvas_height = self.canvas.winfo_height()  # 获取画布的高度
+
+        self.canvas.config(scrollregion=(0, 0, canvas_width, size * rows))
+
+        for i, bit in enumerate(self.memory_manager.bitmap):
+            x = (i % 8) * (size + 5)
+            y = (i // 8) * (size + 5)
+            color = "green" if bit == 0 else "red"
+            self.canvas.create_rectangle(x, y, x + size, y + size, fill=color)
+
 
 
 # 主窗口
