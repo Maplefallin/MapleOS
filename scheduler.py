@@ -1,4 +1,4 @@
-from Modification.pcb_m import PCB, PCBManager
+from pcb import PCB, PCBManager
 from typing import List, Optional
 from buffer import log
 from buffer import address_to_page_number

@@ -17,7 +17,7 @@ class MemoryManager:
             else {"valid": "full", "block": -1, "used": 1024}
             for i in range(VIRTUAL_PAGES)
         ]
-        self.memory_list = [[{"pcb":None,"page":-1}] * (USABLE_BLOCKS/5)]*5
+
         self.memory = [{"pcb":None,"page":-1}] * USABLE_BLOCKS  # 前 USABLE_BLOCKS 个块为空
         self.memory.extend([1] * (MEMORY_BLOCKS - USABLE_BLOCKS))  # 剩余块已满
         self.virtual_memory = [f"Page {i} empty" for i in range(VIRTUAL_PAGES)]
@@ -39,6 +39,10 @@ class MemoryManager:
 
         # 请求选中的页面
         self.request_page(selected_page,pcb)
+
+    def deal_with_write(self,pcb:PCB,number):
+        pcb.page_table[number]["modification"] = 1
+        log.append(f"执行WRITE进程，进程{pcb.process_name}的{number}页修改为置1 ")
 
     def release_memory(self, pcb):
 
@@ -88,30 +92,38 @@ class MemoryManager:
             # print(f"lru前{self.memory_stack}")
 
             evicted_item = self.memory_stack.popleft()
-            print(f"最久未使用的页面为{evicted_item}")
             block_index = evicted_item["block"]
-            print(f"最久未使用的块号为{block_index}")
+            print(f"最久未使用的块号为{block_index},最久未使用的页面为{evicted_item}")
+            log.append(f"最久未使用的块号为{block_index},最久未使用的页面为{evicted_item}")
             evicted_page = evicted_item["page"]
             evicted_pcb = self.memory[block_index]["pcb"]
             evicted_pcb.page_table[evicted_page]["exist"] = 0
+            log.append(f"进程{evicted_pcb.process_name}的页面{evicted_page}写回外存") if \
+                evicted_pcb.page_table[evicted_page]["modification"] == 1 else None
+            print(f"进程{evicted_pcb.process_name}的页面{evicted_page}写回外存") if \
+            evicted_pcb.page_table[evicted_page]["modification"] == 1 else None
             self.bitmap[block_index] = 0  # 将对应的 bitmap 位置设置为 0
             print("LRU")
             log.append(" ")
             log.append("************* LRU *************")
             log.append(f"页面置换: 驱逐{evicted_pcb.process_name} 页面 {evicted_page}")
             # print(f"lru中:{self.memory_stack}")
-            pcb.page_table[page_index]["exist"] = 1
-            pcb.page_table[page_index]["frame"] = block_index
             log.append("*********** FINISH ************")
             log.append(" ")
 
         else:
-            block_index = len(self.memory_stack)
-            self.page_table[page_index]["block"] = block_index
+            block_index = 0
+
+            for i in range(USABLE_BLOCKS):
+                if self.memory[i]["pcb"] is None:
+                    block_index = i
+                    break
 
         self.memory_stack.append({"block":block_index,"page":page_index,"pcb":pcb.process_name})
         self.memory[block_index] = {"pcb":pcb,"page":page_index}  # 更新 memory 数组
         self.bitmap[block_index] = 1  # 将对应的 bitmap 位置设置为 1
+        pcb.page_table[page_index]["exist"] = 1
+        pcb.page_table[page_index]["frame"] = block_index
         log.append(f"{pcb.process_name} 页面 {page_index} 加载到主存块 {block_index}")
 
         # print(f"lru后{self.memory_stack}")

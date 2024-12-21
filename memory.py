@@ -87,9 +87,9 @@ class MemoryManager:
             # print(f"lru前{self.memory_stack}")
 
             evicted_item = self.memory_stack.popleft()
-            print(f"最久未使用的页面为{evicted_item}")
             block_index = evicted_item["block"]
-            print(f"最久未使用的块号为{block_index}")
+            print(f"最久未使用的块号为{block_index},最久未使用的页面为{evicted_item}")
+            log.append(f"最久未使用的块号为{block_index},最久未使用的页面为{evicted_item}")
             evicted_page = evicted_item["page"]
             evicted_pcb = self.memory[block_index]["pcb"]
             evicted_pcb.page_table[evicted_page]["exist"] = 0
@@ -103,8 +103,12 @@ class MemoryManager:
             log.append(" ")
 
         else:
-            block_index = len(self.memory_stack)
-            self.page_table[page_index]["block"] = block_index
+            block_index = 0
+
+            for i in range(USABLE_BLOCKS):
+                if self.memory[i]["pcb"] is None:
+                    block_index = i
+                    break
 
         self.memory_stack.append({"block":block_index,"page":page_index,"pcb":pcb.process_name})
         self.memory[block_index] = {"pcb":pcb,"page":page_index}  # 更新 memory 数组

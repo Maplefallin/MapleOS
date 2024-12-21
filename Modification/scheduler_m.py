@@ -85,6 +85,10 @@ class Scheduler:
                     address = executed_instruction["address"]
                     if operation in ["READ", "WRITE"]:
                         page_number = address_to_page_number(address)  # 假设address_to_page是将地址转换为页号的函数
+
+                        if operation == "WRITE":
+                            memory.deal_with_write(pcb,page_number)
+
                         self.memory_manager.request_page(page_number,pcb)  # 请求页号
                         log.append(f"进程 {pcb.process_name} 执行{operation}指令,请求页面 {page_number}")
                         # 执行完毕后减少剩余时间
@@ -145,5 +149,5 @@ if __name__ == "__main__":
     scheduler.create_process("p3", 1, 7, "", 1000, memory_manager=memory)
     scheduler.create_process("p4", 2, 8, "", 1000, memory_manager=memory)
 
-    for i in range(10):
+    for i in range(50):
         scheduler.schedule()

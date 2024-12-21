@@ -126,7 +126,7 @@ class PCBManager:
         pcb = PCB(process_name, arrive_time, need_time, task_name, size)
 
         for i in range(pcb.page_count):
-            pcb.page_table.append({"page":i,"frame":-1,"exist":0})
+            pcb.page_table.append({"page":i,"frame":-1,"exist":0,"modification":0})
 
         self.processes.append(pcb)
 
