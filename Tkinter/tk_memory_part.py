@@ -1,4 +1,4 @@
-from memory import MemoryManager
+from Modification.memory_m import MemoryManager
 import tkinter as tk
 from tkinter import ttk
 

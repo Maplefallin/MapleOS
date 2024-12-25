@@ -9,7 +9,7 @@ USABLE_BLOCKS = 10
 
 def generate_random_address(page_count):
     """生成一个 0 到 32 * 1024 之间的随机整数"""
-    return random.randint(0*PAGE_SIZE, page_count*PAGE_SIZE)
+    return random.randint(0*PAGE_SIZE, (page_count-2)*PAGE_SIZE)
 
 def generate_hex_address(address):
     """生成一个十六进制地址"""

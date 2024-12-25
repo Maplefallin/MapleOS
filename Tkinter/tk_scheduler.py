@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox,ttk
-from scheduler import Scheduler
-from memory import MemoryManager
+from Modification.scheduler_m import Scheduler
+from Modification.memory_m import MemoryManager
 from Modification.pcb_m import PCBManager
 
 

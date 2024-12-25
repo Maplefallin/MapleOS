@@ -2,13 +2,13 @@ from Modification.pcb_m import PCB, PCBManager
 from typing import List, Optional
 from buffer import log
 from buffer import address_to_page_number
-from memory_m import MemoryManager
+from Modification.memory_m import MemoryManager
 
 
 class Scheduler:
     """多级反馈队列调度器"""
 
-    def __init__(self, pcb_manager: PCBManager, memory_manager: MemoryManager, time_slices: List[int] = [2, 4, 6]):
+    def __init__(self, pcb_manager: PCBManager, memory_manager: MemoryManager, time_slices: List[int] = [1, 3, 5]):
         """
         :param pcb_manager: PCBManager 实例
         :param memory_manager: MemoryManager 实例
@@ -33,7 +33,7 @@ class Scheduler:
         if 0 <= queue_level < len(self.feedback_queues):
             self.feedback_queues[queue_level].append(pcb)
             pcb.ready()
-            log.append(f"进程 {pcb.process_name} 被加入队列 {queue_level}（时间片: {self.time_slices[queue_level]}）")
+            log.append(f"进程 {pcb.process_name} 被加入队列 {queue_level+1}（时间片: {self.time_slices[queue_level]}）")
 
             # 如果是初级队列，则根据到达时间进行排序
             if queue_level == 0:
@@ -58,14 +58,22 @@ class Scheduler:
 
     def _decrement_block_queue_wait(self):
         """减少阻塞队列中进程的等待时间"""
-        for block_queue in self.block_queues:
+        i = 0
+        while i < len(self.block_queues):
+            block_queue = self.block_queues[i]
             block_queue['wait'] -= 1
+
             if block_queue['wait'] == 0:
-                # 等待值为0，将进程移入其下次该移进的就绪队列
+                # 等待值为 0，将进程移入其下次该移进的就绪队列
                 pcb = block_queue['pcb']
                 next_level = block_queue['next_level']
-                self.block_queues.remove(block_queue)  # 从阻塞队列中移除
+                pcb.remaining_time -= 1
+                log.append(f"{pcb.process_name}获得I/O资源，从阻塞队列中释放,剩余时间{pcb.remaining_time}")
+                pcb.ready()
+                self.block_queues.pop(i)  # 从阻塞队列中移除
                 self.add_to_ready_queue(pcb, next_level)
+            else:
+                i += 1  # 只有当没有删除元素时才增加索引
 
     def _execute_process(self, pcb: PCB, level: int):
         """页面请求"""
@@ -75,8 +83,10 @@ class Scheduler:
         time_slice = self.time_slices[level]
         for _ in range(time_slice):
 
-            #总时间片加一
-            self.count += 1
+
+            page_values = [entry["page"] for entry in self.memory_manager.memory_stack]
+            log.append(" ")
+            log.append(f"当前主存栈为{page_values}")
 
             if pcb.remaining_time > 0:
                 executed_instruction = pcb.run()
@@ -87,7 +97,7 @@ class Scheduler:
                         page_number = address_to_page_number(address)  # 假设address_to_page是将地址转换为页号的函数
 
                         if operation == "WRITE":
-                            memory.deal_with_write(pcb,page_number)
+                            self.memory_manager.deal_with_write(pcb,page_number)
 
                         self.memory_manager.request_page(page_number,pcb)  # 请求页号
                         log.append(f"进程 {pcb.process_name} 执行{operation}指令,请求页面 {page_number}")
@@ -98,8 +108,13 @@ class Scheduler:
                         self.block_queues.append(
                             {'pcb': pcb, 'wait': 3, 'next_level': min(level + 1, len(self.feedback_queues) - 1)})
                         log.append(f"进程 {pcb.process_name} 执行{operation}指令,阻塞进程")
+                        log.append("--------------- FINSIH ---------------")
+                        log.append(" ")
                         break
+
                 log.append(f"进程 {pcb.process_name} 执行中，剩余时间: {pcb.remaining_time}")
+                log.append("--------------- FINSIH ---------------")
+                log.append(" ")
 
             else:
                 break

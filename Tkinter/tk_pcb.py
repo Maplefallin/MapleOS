@@ -1,6 +1,4 @@
 from Modification.pcb_m import PCB,PCBManager
-
-
 import tkinter as tk
 from tkinter import ttk
 
@@ -28,10 +26,11 @@ class ProcessInfoWindow(tk.Toplevel):
         tables_layout.pack(padx=10, pady=10, fill="both", expand=True)
 
         # 页表信息表格
-        self.page_table = ttk.Treeview(tables_layout, columns=("Page", "Frame", "Exist"), show="headings")
+        self.page_table = ttk.Treeview(tables_layout, columns=("Page", "Frame", "Exist","Modification"), show="headings")
         self.page_table.heading("Page", text="页号")
         self.page_table.heading("Frame",text="页框号")
         self.page_table.heading("Exist", text="存在位")
+        self.page_table.heading("Modification", text="修改位")
         self.fill_page_table()
         self.page_table.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
@@ -58,6 +57,7 @@ class ProcessInfoWindow(tk.Toplevel):
         self.page_table.column("Page", width=80, anchor="center")
         self.page_table.column("Frame", width=80, anchor="center")
         self.page_table.column("Exist", width=80, anchor="center")
+        self.page_table.column("Modification", width=80, anchor="center")
 
 
         self.instruction_table.column("Operation", width=100, anchor="center")
@@ -81,7 +81,7 @@ class ProcessInfoWindow(tk.Toplevel):
     def fill_page_table(self):
         """填充 PCB 的页表信息表格"""
         for item in self.pcb.page_table:
-            self.page_table.insert("", "end", values=(item["page"], item["frame"], item["exist"]))
+            self.page_table.insert("", "end", values=(item["page"], item["frame"], item["exist"],item["modification"]))
 
     def fill_instruction_table(self):
         """填充 PCB 的指令集信息表格"""

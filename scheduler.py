@@ -59,14 +59,23 @@ class Scheduler:
 
     def _decrement_block_queue_wait(self):
         """减少阻塞队列中进程的等待时间"""
-        for block_queue in self.block_queues:
+
+        i = 0
+        while i < len(self.block_queues):
+            block_queue = self.block_queues[i]
             block_queue['wait'] -= 1
+
             if block_queue['wait'] == 0:
-                # 等待值为0，将进程移入其下次该移进的就绪队列
+                # 等待值为 0，将进程移入其下次该移进的就绪队列
                 pcb = block_queue['pcb']
                 next_level = block_queue['next_level']
-                self.block_queues.remove(block_queue)  # 从阻塞队列中移除
+                pcb.remaining_time -= 1
+                log.append(f"{pcb.process_name}获得I/O资源，从阻塞队列中释放,剩余时间{pcb.remaining_time}")
+                self.block_queues.pop(i)  # 从阻塞队列中移除
                 self.add_to_ready_queue(pcb, next_level)
+            else:
+                i += 1  # 只有当没有删除元素时才增加索引
+
 
     def _execute_process(self, pcb: PCB, level: int):
         """页面请求"""

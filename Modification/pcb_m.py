@@ -16,7 +16,7 @@ class PCB:
         self.size = size
         self.begin = -1  # 页框号的起始地址
         self.page_count = 0  # 分配的页面数
-        self.page_table = []  # 地址表 [{"page":None,"frame"：-1,"exist":0}]
+        self.page_table = []  # 地址表 [{"page":None,"frame"：-1,"exist":0,"modification":0}]
         self.status = "Ready"  # 默认状态为就绪
         self.remaining_time = need_time  # 剩余执行时间
         self.memory_index = -1
@@ -76,9 +76,7 @@ class PCB:
                 elif operation == "OUTPUT":
                     self.output_data()
 
-                log.append(f"进程 {self.process_name} 执行完毕，剩余时间: {self.remaining_time}")
-                log.append("--------------- FINSIH ---------------")
-                log.append(" ")
+
                 return instruction
 
             else:
@@ -150,6 +148,10 @@ class PCBManager:
 
 
     def request_pages_for_process(self, process_name: str, memory_manager):
+
+        log.append("")
+        log.append(f"=================={process_name} 请求调入内存====================")
+
         """根据进程名请求页面"""
         for pcb in self.processes:
             if pcb.process_name == process_name:

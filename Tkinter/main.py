@@ -1,9 +1,9 @@
 import tkinter as tk
 
-from memory import MemoryManager
+from Modification.memory_m import MemoryManager
 # 引用其他组件类
 from Modification.pcb_m import PCBManager
-from scheduler import Scheduler
+from Modification.scheduler_m import Scheduler
 from tk_pcb import ProcessListWindow
 from tk_memory import MemoryViewer
 from tk_scheduler import SchedulerGUI
@@ -26,6 +26,7 @@ class MainWindow(tk.Tk):
         self.scheduler.create_process("P2", 0, 8, "T1", 2000, memory_manager=self.memory)
         self.scheduler.create_process("P3", 1, 7, "T3", 1000, memory_manager=self.memory)
         self.scheduler.create_process("P4", 1, 8, "T2", 2000, memory_manager=self.memory)
+        self.scheduler.create_process("P5", 2, 8, "T2", 2000, memory_manager=self.memory)
 
         # 创建组件
         self.create_widgets()

@@ -1,6 +1,7 @@
+import random
 import tkinter as tk
 from tkinter import ttk
-from buffer import USABLE_BLOCKS
+from buffer import USABLE_BLOCKS, MEMORY_BLOCKS
 from memory import MemoryManager
 
 
@@ -75,10 +76,14 @@ class MemoryViewer(tk.Frame):
         for row in self.page_table_tree.get_children():
             self.page_table_tree.delete(row)
 
-        for i, entry in enumerate(self.memory_manager.memory[:USABLE_BLOCKS]):
-            process_name = entry["pcb"].process_name if entry["pcb"] else "Empty"
-
-            self.page_table_tree.insert("", "end", values=(i, process_name, entry["page"]))
+        for i, entry in enumerate(self.memory_manager.memory):
+            if i < MEMORY_BLOCKS - USABLE_BLOCKS:
+                # 前 MEMORY_BLOCKS - USABLE_BLOCKS 个条目填充随机的进程名和页号
+                self.page_table_tree.insert("", "end", values=(i, "Full", i%10))
+            else:
+                # 其余的条目使用原本的 process_name 和 entry["page"]
+                process_name = entry["pcb"].process_name if entry["pcb"] else "Empty"
+                self.page_table_tree.insert("", "end", values=(i, process_name, entry["page"]))
 
         # Update Memory Stack display
         for row in self.memory_stack_tree.get_children():
