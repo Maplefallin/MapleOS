@@ -4,7 +4,6 @@ from buffer import log
 from buffer import address_to_page_number
 from Modification.memory_m import MemoryManager
 
-
 class Scheduler:
     """多级反馈队列调度器"""
 
@@ -152,7 +151,6 @@ class Scheduler:
         """插入高优先级任务"""
         self.add_to_ready_queue(pcb, queue_level=0)
         log.append(f"插入高优先级进程 {pcb.process_name} 到队列 0")
-
 
 if __name__ == "__main__":
     pcb_manager = PCBManager()

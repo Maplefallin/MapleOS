@@ -2,9 +2,9 @@ import sys
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSplitter, QApplication
 from PyQt5.QtCore import Qt
-from scheduler import Scheduler
-from pcb import PCBManager
-from memory import MemoryManager
+from Modification.scheduler_m import Scheduler
+from Modification.pcb_m import PCBManager
+from Modification.memory_m import MemoryManager
 from QT import LogTextEdit
 from QT import SchedulerGUI
 from QT import MemoryManagerGUI
@@ -19,6 +19,11 @@ class MainWindow(QWidget):
 
         # 创建 Scheduler 实例
         self.scheduler = Scheduler(self.pcb_manager, self.memory_manager)
+        self.scheduler.create_process("P1",0,7,"T1",1000,memory_manager=self.memory_manager)
+        self.scheduler.create_process("P2", 0, 8, "T1", 2000, memory_manager=self.memory_manager)
+        self.scheduler.create_process("P3", 1, 7, "T3", 1000, memory_manager=self.memory_manager)
+        self.scheduler.create_process("P4", 1, 8, "T2", 2000, memory_manager=self.memory_manager)
+        self.scheduler.create_process("P5", 2, 8, "T2", 2000, memory_manager=self.memory_manager)
 
         # 创建各个组件
         self.scheduler_gui = SchedulerGUI(self.scheduler)

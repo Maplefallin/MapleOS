@@ -1,4 +1,4 @@
-from pcb import PCB
+from Modification.pcb_m import PCB
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QDialog, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QFont

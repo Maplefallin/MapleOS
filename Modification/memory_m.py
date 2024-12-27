@@ -11,12 +11,6 @@ from buffer import VIRTUAL_PAGES, PAGE_SIZE, MEMORY_BLOCKS, USABLE_BLOCKS
 class MemoryManager:
 
     def __init__(self):
-        # 初始化 page_table
-        self.page_table = [
-            {"valid": "empty", "block": -1, "used": 0} if i < VIRTUAL_PAGES // 2
-            else {"valid": "full", "block": -1, "used": 1024}
-            for i in range(VIRTUAL_PAGES)
-        ]
 
         # 初始化内存，先填充所有块为空
         self.memory = [{"pcb": None, "page": -1}] * MEMORY_BLOCKS

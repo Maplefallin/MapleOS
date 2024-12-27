@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLin
     QFormLayout, QListWidget, QListWidgetItem, QLabel, QFrame
 from PyQt5.QtCore import Qt, QTimer
 from buffer import log
-from scheduler import Scheduler
+from Modification.scheduler_m import Scheduler
 from .qt_pcb import PCBWidget
 
 
